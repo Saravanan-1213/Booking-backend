@@ -1,53 +1,36 @@
 import express from "express";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import { UserModel } from "../models/User.js";
+import {
+  updateUser,
+  deleteUser,
+  getUser,
+  getUsers,
+} from "../controllers/user.js";
+import { verifyAdmin, verifyToken, verifyUser } from "../utils/verifyToken.js";
 
 const router = express.Router();
 
-router.post("/register", async (req, res) => {
-  const { username, password } = req.body;
-  const user = await UserModel.findOne({ username });
-  if (user) {
-    return res.status(400).json({ message: "Username already exists" });
-  }
+// router.get("/checkauthentication", verifyToken, (req,res,next)=>{
+//   res.send("hello user, you are logged in")
+// })
 
-  // hashed password
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new UserModel({ username, password: hashedPassword });
-  await newUser.save();
-  res.json({ message: "User registered successfully" });
-});
+// router.get("/checkuser/:id", verifyUser, (req,res,next)=>{
+//   res.send("hello user, you are logged in and you can delete your account")
+// })
 
-router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+// router.get("/checkadmin/:id", verifyAdmin, (req,res,next)=>{
+//   res.send("hello admin, you are logged in and you can delete all accounts")
+// })
 
-  const user = await UserModel.findOne({ username });
+//UPDATE
+router.put("/:id", updateUser);
 
-  if (!user) {
-    return res.status(400).json({ message: "Invalid Credentials" });
-  }
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    return res.status(400).json({ message: "Invalid Credentials" });
-  }
-  const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY);
-  res.json({ token, userID: user._id });
-});
+//DELETE
+router.delete("/:id", deleteUser);
 
-export { router as userRouter };
+//GET
+router.get("/:id", getUser);
 
-// authorization  part (Middleware)
-export const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization;
-  if (token) {
-    jwt.verify(token, process.env.SECRET_KEY, (err) => {
-      if (err) {
-        return res.sendStatus(403);
-      }
-      next();
-    });
-  } else {
-    res.sendStatus(401);
-  }
-};
+//GET ALL
+router.get("/", getUsers);
+
+export default router;

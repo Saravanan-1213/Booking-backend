@@ -5,7 +5,8 @@ import hotelsRoute from "./routes/hotels.js";
 import roomsRoute from "./routes/rooms.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { userRouter } from "./routes/users.js";
+import authRoute from "./routes/auth.js";
+import usersRoute from "./routes/users.js";
 
 const app = express();
 dotenv.config();
@@ -17,12 +18,20 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 
-app.use("/api", userRouter);
+app.use("/auth/api", authRoute);
+app.use("/api/users", usersRoute);
 app.use("/api/hotels", hotelsRoute);
 app.use("/api/rooms", roomsRoute);
 
-mongoose.connect(process.env.MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+const connect = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URL);
+    console.log("Connected to mongoDB.");
+  } catch (error) {
+    throw error;
+  }
+};
+app.listen(PORT, () => {
+  connect();
+  console.log("Connected to backend.", PORT);
 });
-app.listen(PORT, () => console.log("Server started", PORT));
