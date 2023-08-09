@@ -26,9 +26,9 @@ router.delete("/:id", deleteHotel);
 router.get("/find/:id", getHotel);
 
 //GET ALL
-router.get("/", verifyToken, getHotels);
-router.get("/countByCity", verifyToken, countByCity);
-router.get("/countByType", verifyToken, countByType);
-router.get("/room/:id", verifyToken, getHotelRooms);
+router.get("/", getHotels);
+router.get("/countByCity", countByCity);
+router.get("/countByType", countByType);
+router.get("/room/:id", getHotelRooms);
 
 export default router;
